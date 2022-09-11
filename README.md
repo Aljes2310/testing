@@ -1,4 +1,5 @@
-Hi! I'm Alfredo Alvarado
+Hi! I'm Alfredo Alvarado.
+
 Currently , I'm learning python
 
 About programming, I know how to process data in R,  specially oceanographic data 
