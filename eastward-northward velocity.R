@@ -15,7 +15,7 @@ library(cmocean)
 library(reshape2)
 
 #unidades:m/s, vo: nortward velocity, so: eastward velocity
-v="global-reanalysis-phy-001-030-monthly_1634163480120.nc"
+v="global-reanalysis-phy-001-030-monthly_1634163480120.nc"  #DATA FROM GLOBAL REANALYSIS(GLORYS) FROM CMEMS 
 n=nc_open(v)
 vo=ncvar_get(n,"vo")
 uo=ncvar_get(n,"uo")
@@ -56,22 +56,18 @@ df$uo=df$uo*100
 df=na.omit(df)
 df$velocity = sqrt((df$uo)^2 + (df$vo)^2)
 
-#ver solo 50m
-Current0_50m=df%>%filter(Depth<=50)
-Current50_100m=df%>%filter(Depth>=50 & Depth<=100)
+#filtering
+superf=df%>%filter(Depth<=5)
 
-Current50_100m=Current50_100m%>%select(velocity)%>%
-  group_by(year=Current50_100m$year, month=Current50_100m$month, Latitud=Current50_100m$Latitud, Longitud=Current50_100m$Longitud)%>% 
+
+#average by month and year
+superf_df=superf%>%select(uo, vo, velocity)%>%
+  group_by(year=superf$year, month=superf$month, Latitud=superf$Latitud, Longitud=superf$Longitud)%>% 
   summarise_if(is.numeric, mean , na.rm=TRUE)
 
 
-
-colnames(superf)[5]="Current_Velocity"
-colnames(superf)[1:2]=c("Longitud","Latitud")
-world
-
-
-ggplot(data = superf%>%filter(year==2017),aes(x = Longitude, y = Latitude)) + 
+#ploting zonal velocity mean
+ggplot(data = superf_df%>%filter(year==2017),aes(x = Longitud, y = Latitud)) + 
   geom_raster(aes(fill = uo), interpolate = FALSE)+
   geom_contour(aes(z = uo), color="black")+
   geom_text_contour(aes(z = uo), skip=0, stroke = 0.1)+
